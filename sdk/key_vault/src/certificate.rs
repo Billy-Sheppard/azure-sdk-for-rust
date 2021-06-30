@@ -144,7 +144,7 @@ pub struct KeyVaultCertificate {
     content_type: String,
     enabled: bool,
     not_before: Option<DateTime<Utc>>,
-    expiries_on: Option<DateTime<Utc>>,
+    expires_on: Option<DateTime<Utc>>,
     time_created: DateTime<Utc>,
     time_updated: DateTime<Utc>,
 }
@@ -231,7 +231,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
             content_type: response.policy.secret_props.content_type,
             enabled: response.attributes.enabled,
             not_before: response.attributes.nbf,
-            expiries_on: response.attributes.exp,
+            expires_on: response.attributes.exp,
             time_created: response.attributes.created,
             time_updated: response.attributes.updated,
         })
