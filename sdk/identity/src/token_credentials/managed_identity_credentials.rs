@@ -1,7 +1,6 @@
 use super::TokenCredential;
 use azure_core::TokenResponse;
-use chrono::serde::ts_seconds;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use oauth2::AccessToken;
 use serde::Deserialize;
 use std::str;
@@ -67,10 +66,14 @@ impl TokenCredential for ManagedIdentityCredential {
         let token_response = serde_json::from_str::<MsiTokenResponse>(&res_body)
             .map_err(|e| ManagedIdentityCredentialError::DeserializeError(e, res_body))?;
 
-        Ok(TokenResponse::new(
-            token_response.access_token,
-            token_response.expires_on,
-        ))
+        let expires_on = chrono::DateTime::<Utc>::from_utc(
+            chrono::NaiveDateTime::from_timestamp(
+                token_response.expires_on.parse::<i64>().unwrap(),
+                0,
+            ),
+            Utc,
+        );
+        Ok(TokenResponse::new(token_response.access_token, expires_on))
     }
 }
 
@@ -89,8 +92,7 @@ impl azure_core::TokenCredential for ManagedIdentityCredential {
 #[derive(Debug, Clone, Deserialize)]
 struct MsiTokenResponse {
     pub access_token: AccessToken,
-    #[serde(with = "ts_seconds")]
-    pub expires_on: DateTime<Utc>,
+    pub expires_on: String,
     pub token_type: String,
     pub resource: String,
 }
