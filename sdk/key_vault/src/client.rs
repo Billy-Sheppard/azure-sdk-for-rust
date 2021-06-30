@@ -57,7 +57,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
             .token_credential
             .get_token(&self.endpoint)
             .await
-            .map_err(|_| Error::Authorization)?;
+            .map_err(|e| Error::Authorization(e))?;
         self.token = Some(token);
         Ok(())
     }

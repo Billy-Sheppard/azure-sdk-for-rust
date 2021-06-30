@@ -3,6 +3,7 @@ mod client;
 pub mod key;
 pub mod secret;
 
+use azure_core::Error;
 pub use client::KeyClient;
 
 use std::fmt;
@@ -35,8 +36,8 @@ pub enum Error {
     #[error("Key Vault does not exist, or is unreachable at '{keyvault_name:?}.vault.azure.net'")]
     KeyVaultDoesNotExist { keyvault_name: String },
 
-    #[error("Azure Active Directory authorization error")]
-    Authorization,
+    #[error("Azure Active Directory authorization error: {0}")]
+    Authorization(Error),
 
     #[error("Received an error accessing the Key Vault, which could not be parsed as expected.")]
     UnparsableError,
