@@ -31,8 +31,8 @@ pub enum ManagedIdentityCredentialError {
     SendError(reqwest::Error),
     #[error("Error getting text for refresh token: {0}")]
     TextError(reqwest::Error),
-    #[error("Error deserializing refresh token: {0}")]
-    DeserializeError(serde_json::Error),
+    #[error("Error deserializing refresh token: {0}, Response: {1}")]
+    DeserializeError(serde_json::Error, String),
 }
 
 #[async_trait::async_trait]
@@ -64,7 +64,7 @@ impl TokenCredential for ManagedIdentityCredential {
             .map_err(ManagedIdentityCredentialError::TextError)?;
 
         let token_response = serde_json::from_str::<MsiTokenResponse>(&res_body)
-            .map_err(ManagedIdentityCredentialError::DeserializeError)?;
+            .map_err(|e| ManagedIdentityCredentialError::DeserializeError(e, res_body))?;
 
         Ok(TokenResponse::new(
             token_response.access_token,
