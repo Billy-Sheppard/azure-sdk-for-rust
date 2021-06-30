@@ -88,6 +88,7 @@ impl azure_core::TokenCredential for ManagedIdentityCredential {
 #[derive(Debug, Clone, Deserialize)]
 struct MsiTokenResponse {
     pub access_token: AccessToken,
+    #[serde(with = "ts_seconds")]
     pub expires_on: DateTime<Utc>,
     pub token_type: String,
     pub resource: String,
