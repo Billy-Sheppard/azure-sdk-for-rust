@@ -2,8 +2,6 @@ pub mod certificate;
 mod client;
 pub mod key;
 pub mod secret;
-
-use azure_core::Error;
 pub use client::KeyClient;
 
 use std::fmt;
@@ -37,7 +35,7 @@ pub enum Error {
     KeyVaultDoesNotExist { keyvault_name: String },
 
     #[error("Azure Active Directory authorization error: {0}")]
-    Authorization(Error),
+    Authorization(azure_core::Error),
 
     #[error("Received an error accessing the Key Vault, which could not be parsed as expected.")]
     UnparsableError,
