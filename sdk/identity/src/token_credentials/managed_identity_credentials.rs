@@ -1,5 +1,6 @@
 use super::TokenCredential;
 use azure_core::TokenResponse;
+use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
 use oauth2::AccessToken;
 use serde::Deserialize;
