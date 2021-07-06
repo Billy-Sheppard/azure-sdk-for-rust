@@ -9,7 +9,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{Map, Value};
 
 use crate::client::API_VERSION_PARAM;
-use crate::Error;
+use crate::Error::{self, SerdeParse};
 use crate::KeyClient;
 
 /// A KeyBundle consisting of a WebKey plus its attributes.
@@ -411,7 +411,11 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
         uri.set_query(Some(API_VERSION_PARAM));
 
         let resp_body = self.get_authed(uri.to_string()).await?;
-        let response = serde_json::from_str::<KeyVaultKey>(&resp_body)?;
+        let response =
+            serde_json::from_str::<KeyVaultKey>(&resp_body).map_err(|error| SerdeParse {
+                error,
+                response_body: resp_body.clone(),
+            })?;
         Ok(response)
     }
 
@@ -442,7 +446,11 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
             )
             .await?;
 
-        let mut result = serde_json::from_str::<SignResult>(&response)?;
+        let mut result =
+            serde_json::from_str::<SignResult>(&response).map_err(|error| SerdeParse {
+                error,
+                response_body: response.clone(),
+            })?;
         result.algorithm = algorithm;
         Ok(result)
     }

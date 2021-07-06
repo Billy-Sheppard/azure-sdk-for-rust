@@ -46,8 +46,15 @@ pub enum Error {
     #[error("Key Vault Error: {0}")]
     General(String),
 
-    #[error("Failed to parse response from Key Vault: {0}")]
-    SerdeParse(#[from] serde_json::Error),
+    #[error(
+        "Failed to parse response from Key Vault: {}, response: {}",
+        error,
+        response_body
+    )]
+    SerdeParse {
+        error: serde_json::Error,
+        response_body: String,
+    },
 
     #[error("Could not get vault domain")]
     DomainParse,
