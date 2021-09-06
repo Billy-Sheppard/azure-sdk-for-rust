@@ -1,5 +1,5 @@
 use crate::client::API_VERSION_PARAM;
-use crate::Error::{self, SerdeParse};
+use crate::Error;
 use crate::KeyClient;
 use crate::RecoveryLevel;
 
@@ -197,12 +197,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).map_err(
-                |error| SerdeParse {
-                    error,
-                    response_body: resp_body.clone(),
-                },
-            )?;
+            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
 
             secrets.extend(
                 response
@@ -260,12 +255,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).map_err(
-                |error| SerdeParse {
-                    error,
-                    response_body: resp_body.clone(),
-                },
-            )?;
+            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
 
             secret_versions.extend(
                 response
