@@ -1,5 +1,5 @@
 use crate::client::API_VERSION_PARAM;
-use crate::Error;
+use crate::Error::{self, SerdeParse};
 use crate::KeyClient;
 use crate::RecoveryLevel;
 
@@ -51,7 +51,7 @@ pub(crate) struct KeyVaultGetSecretResponseAttributes {
     enabled: bool,
     #[serde(default)]
     #[serde(with = "ts_seconds_option")]
-    expires_on: Option<DateTime<Utc>>,
+    exp: Option<DateTime<Utc>>,
     #[serde(with = "ts_seconds")]
     created: DateTime<Utc>,
     #[serde(with = "ts_seconds")]
@@ -87,7 +87,7 @@ pub struct KeyVaultSecret {
     id: String,
     value: String,
     enabled: bool,
-    expiry: Option<DateTime<Utc>>,
+    expires_on: Option<DateTime<Utc>>,
     time_created: DateTime<Utc>,
     time_updated: DateTime<Utc>,
 }
@@ -160,7 +160,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
                 }
             })?;
         Ok(KeyVaultSecret {
-            expiry: response.attributes.expires_on,
+            expires_on: response.attributes.exp,
             enabled: response.attributes.enabled,
             value: response.value,
             time_created: response.attributes.created,
@@ -197,7 +197,12 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
+            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).map_err(
+                |error| SerdeParse {
+                    error,
+                    response_body: resp_body.clone(),
+                },
+            )?;
 
             secrets.extend(
                 response
@@ -255,7 +260,12 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
+            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).map_err(
+                |error| SerdeParse {
+                    error,
+                    response_body: resp_body.clone(),
+                },
+            )?;
 
             secret_versions.extend(
                 response
