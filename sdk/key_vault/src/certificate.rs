@@ -217,9 +217,9 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         let response_body = self.get_authed(uri.to_string()).await?;
         let response = serde_json::from_str::<KeyVaultGetCertificateResponse>(&response_body)
-            .map_err(|error| Error::BackupCertificateParseError {
+            .map_err(|error| Error::BackupSecretParseError {
                 error,
-                certificate_name: certificate_name.to_string(),
+                secret_name: certificate_name.to_string(),
                 response_body,
             })?;
         Ok(KeyVaultCertificate {
@@ -598,9 +598,9 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
         let backup_blob = serde_json::from_str::<KeyVaultCertificateBackupResponseRaw>(
             &response_body,
         )
-        .map_err(|error| Error::BackupCertificateParseError {
+        .map_err(|error| Error::BackupSecretParseError {
             error,
-            certificate_name: certificate_name.to_string(),
+            secret_name: certificate_name.to_string(),
             response_body,
         })?;
 
