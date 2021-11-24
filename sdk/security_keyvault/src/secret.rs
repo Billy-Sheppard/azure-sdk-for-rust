@@ -196,7 +196,11 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
+            let response =
+                serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).map_err(|e| {
+                    println!("{:#?}", resp_body);
+                    e
+                })?;
 
             secrets.extend(
                 response
@@ -214,7 +218,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
             match response.next_link {
                 None => break,
-                Some(u) => uri = Url::parse(&u).unwrap(),
+                Some(u) => uri = Url::parse(&u)?,
             }
         }
 
@@ -254,7 +258,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
 
         loop {
             let resp_body = self.get_authed(uri.to_string()).await?;
-            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body).unwrap();
+            let response = serde_json::from_str::<KeyVaultGetSecretsResponse>(&resp_body)?;
 
             secret_versions.extend(
                 response
@@ -271,7 +275,7 @@ impl<'a, T: TokenCredential> KeyClient<'a, T> {
             );
             match response.next_link {
                 None => break,
-                Some(u) => uri = Url::parse(&u).unwrap(),
+                Some(u) => uri = Url::parse(&u)?,
             }
         }
 
